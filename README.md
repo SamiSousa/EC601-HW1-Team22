@@ -2,7 +2,7 @@
 Team 22 Mini Project for Homework 1
 
 # Team Members
-Sami Shahin
-Davide Lucchi
+- Davide Lucchi
+- Sami Shahin
 
 # Project Name (TBD)
