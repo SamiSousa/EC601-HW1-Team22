@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     Mat original_image;// = imread( filename );
     Mat frame, frame1;	/////////////
 
-for(;;){
+for(;;){//add a loop here so the program will deal with the frames one by one
     video >> original_image;
 //    if (original_image.empty())
 //		{
