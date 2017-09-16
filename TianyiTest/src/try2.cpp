@@ -20,9 +20,9 @@
 using namespace std;
 using namespace cv;
 
-VideoCapture openVideo(string filename);
+VideoCapture openVideo2(string filename);
 
-VideoCapture openVideo(string filename)
+VideoCapture openVideo2(string filename)
 {
 	VideoCapture capture(filename);
 	if (!capture.isOpened())
@@ -68,110 +68,77 @@ int main(int argc, char** argv)
     CommandLineParser parser(argc, argv, "{@input| ../data/right.jpg |}");
 
     string filename = parser.get<string>("@input");
-    
-    VideoCapture video = openVideo(filename);
+
+    VideoCapture video = openVideo2(filename);
     Mat image;
-    Mat original_image;// = imread( filename );
+    // = imread( filename );
     Mat frame, frame1;	/////////////
 
+    // move a few frames ahead into the video
+    Mat f;
+    for (int i = 0; i < 1000; i++)
+    	video >> f;
+
+    // calculate the transformation
+    float original_image_cols = (float)f.cols;
+	float original_image_rows = (float)f.rows;
+	// square coordinates
+	roi_corners.push_back(Point2f( (float)(original_image_cols / 1.95), (float)(original_image_rows / 4.20) ));
+	roi_corners.push_back(Point2f( (float)(f.cols / 1.15), (float)(f.rows / 3.32) ));
+	roi_corners.push_back(Point2f( (float)(f.cols / 1.33), (float)(f.rows / 1.10) ));
+	roi_corners.push_back(Point2f( (float)(f.cols / 1.93), (float)(f.rows / 1.36) ));
+
+	dst_corners[0].x = 0;
+	dst_corners[0].y = 0;
+
+	dst_corners[1].x = (float)std::max(norm(roi_corners[0] - roi_corners[1]), norm(roi_corners[2] - roi_corners[3]));
+	dst_corners[1].y = 0;
+
+	dst_corners[2].x = (float)std::max(norm(roi_corners[0] - roi_corners[1]), norm(roi_corners[2] - roi_corners[3]));
+	dst_corners[2].y = (float)std::max(norm(roi_corners[1] - roi_corners[2]), norm(roi_corners[3] - roi_corners[0]));
+
+	dst_corners[3].x = 0;
+	dst_corners[3].y = (float)std::max(norm(roi_corners[1] - roi_corners[2]), norm(roi_corners[3] - roi_corners[0]));
+
+	Size warped_image_size = Size(cvRound(dst_corners[2].x), cvRound(dst_corners[2].y));
+
+	Mat H = findHomography(roi_corners, dst_corners); //get homography
+
 for(;;){//add a loop here so the program will deal with the frames one by one
-    video >> original_image;
-//    if (original_image.empty())
-//		{
-//			break;
-//		}
 
+    Mat original_image;
+	video >> original_image;
+	if (original_image.empty())
+	{
+		break;
+	}
 
-    float original_image_cols = (float)original_image.cols;
-    float original_image_rows = (float)original_image.rows;
-    roi_corners.push_back(Point2f( (float)(original_image_cols / 1.70), (float)(original_image_rows / 4.20) ));
-    roi_corners.push_back(Point2f( (float)(original_image.cols / 1.15), (float)(original_image.rows / 3.32) ));
-    roi_corners.push_back(Point2f( (float)(original_image.cols / 1.33), (float)(original_image.rows / 1.10) ));
-    roi_corners.push_back(Point2f( (float)(original_image.cols / 1.93), (float)(original_image.rows / 1.36) ));
 
     namedWindow(windowTitle, WINDOW_NORMAL);
     namedWindow("Warped Image", WINDOW_AUTOSIZE);
     moveWindow("Warped Image", 20, 20);
     moveWindow(windowTitle, 330, 20);
 
-    setMouseCallback(windowTitle, onMouse, 0);
-    bool endProgram = false;
-    while (!endProgram)//the program will keep in this loop and never come out
-    {
-        if ( validation_needed & (roi_corners.size() < 4) )
-        {
-            validation_needed = false;
-            image = original_image.clone();
 
-            for (size_t i = 0; i < roi_corners.size(); ++i)
-            {
-                circle( image, roi_corners[i], 5, Scalar(0, 255, 0), 3 );
+	image = original_image.clone();
+	// draw the 4 points on the image
+	for ( int i = 0; i < 4; ++i )
+	{
+		line(image, roi_corners[i], roi_corners[(i + 1) % 4], Scalar(0, 0, 255), 2);
+		circle(image, roi_corners[i], 5, Scalar(0, 255, 0), 3);
+		putText(image, labels[i].c_str(), roi_corners[i], QT_FONT_NORMAL, 0.8, Scalar(255, 0, 0), 2);
+	}
 
-                if( i > 0 )
-                {
-                    line(image, roi_corners[i-1], roi_corners[(i)], Scalar(0, 0, 255), 2);
-                    circle(image, roi_corners[i], 5, Scalar(0, 255, 0), 3);
-                    putText(image, labels[i].c_str(), roi_corners[i], QT_FONT_NORMAL, 0.8, Scalar(255, 0, 0), 2);
-                }
-            }
-            imshow( windowTitle, image );
-        }
+	imshow( windowTitle, image );
 
-        if ( validation_needed & ( roi_corners.size() == 4 ))
-        {
-            image = original_image.clone();
-            for ( int i = 0; i < 4; ++i )
-            {
-                line(image, roi_corners[i], roi_corners[(i + 1) % 4], Scalar(0, 0, 255), 2);
-                circle(image, roi_corners[i], 5, Scalar(0, 255, 0), 3);
-                putText(image, labels[i].c_str(), roi_corners[i], QT_FONT_NORMAL, 0.8, Scalar(255, 0, 0), 2);
-            }
+	Mat warped_image;
+	warpPerspective(original_image, warped_image, H, warped_image_size); // do perspective transformation
+	imshow("Warped Image", warped_image);
 
-            imshow( windowTitle, image );
+    waitKey( 20 );
 
-            dst_corners[0].x = 0;
-            dst_corners[0].y = 0;
-            dst_corners[1].x = (float)std::max(norm(roi_corners[0] - roi_corners[1]), norm(roi_corners[2] - roi_corners[3]));
-            dst_corners[1].y = 0;
-            dst_corners[2].x = (float)std::max(norm(roi_corners[0] - roi_corners[1]), norm(roi_corners[2] - roi_corners[3]));
-            dst_corners[2].y = (float)std::max(norm(roi_corners[1] - roi_corners[2]), norm(roi_corners[3] - roi_corners[0]));
-            dst_corners[3].x = 0;
-            dst_corners[3].y = (float)std::max(norm(roi_corners[1] - roi_corners[2]), norm(roi_corners[3] - roi_corners[0]));
 
-            Size warped_image_size = Size(cvRound(dst_corners[2].x), cvRound(dst_corners[2].y));
-
-            Mat H = findHomography(roi_corners, dst_corners); //get homography
-
-            Mat warped_image;
-            warpPerspective(original_image, warped_image, H, warped_image_size); // do perspective transformation
-            imshow("Warped Image", warped_image);
-        }
-
-        char c = (char)waitKey( 10 );
-
-        if ((c == 'q') | (c == 'Q') | (c == 27))
-        {
-            endProgram = true;
-        }
-
-        if ((c == 'c') | (c == 'C'))
-        {
-            roi_corners.clear();
-        }
-
-        if ((c == 'r') | (c == 'R'))
-        {
-            roi_corners.push_back(roi_corners[0]);
-            roi_corners.erase(roi_corners.begin());
-        }
-
-        if ((c == 'i') | (c == 'I'))
-        {
-            swap(roi_corners[0], roi_corners[1]);
-            swap(roi_corners[2], roi_corners[3]);
-        }
- 
-    }}/////////
+}/////////
     return 0;
 }
 
