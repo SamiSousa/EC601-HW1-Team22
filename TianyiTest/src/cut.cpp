@@ -7,25 +7,10 @@
 #include <string>
 #include <math.h>
 #include <string>
+#include "readVideoFunctions.hpp"
 
 using namespace cv;
 using namespace std;
-
-VideoCapture openVideo(string filename);
-
-VideoCapture openVideo(string filename)
-{
-	VideoCapture capture(filename);
-	if (!capture.isOpened())
-	{
-		throw "Error - could not open the video";
-	}
-
-	return capture;
-}
-
-
-
 
 int main()
 {
