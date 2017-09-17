@@ -54,10 +54,8 @@ int main(int argc, char** argv)
     Mat image;
 
 
-    // move a few frames ahead into the video
     Mat f;
-    for (int i = 0; i < 1000; i++)
-    	video >> f;
+    video >> f;
 
     // calculate the transformation
     float original_image_cols = (float)f.cols;
@@ -84,6 +82,12 @@ int main(int argc, char** argv)
 
 	Mat H = findHomography(roi_corners, dst_corners); //get homography
 
+
+	namedWindow(windowTitle, WINDOW_NORMAL);
+	namedWindow("Warped Image", WINDOW_AUTOSIZE);
+	moveWindow("Warped Image", 20, 20);
+	moveWindow(windowTitle, 330, 20);
+
 	for(;;){//add a loop here so the program will deal with the frames one by one
 
 		Mat original_image;
@@ -95,10 +99,6 @@ int main(int argc, char** argv)
 		}
 
 
-		namedWindow(windowTitle, WINDOW_NORMAL);
-		namedWindow("Warped Image", WINDOW_AUTOSIZE);
-		moveWindow("Warped Image", 20, 20);
-		moveWindow(windowTitle, 330, 20);
 
 
 		image = original_image.clone();
