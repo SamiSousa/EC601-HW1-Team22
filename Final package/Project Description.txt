@@ -1,7 +1,3 @@
-In this project, we improved the example, warpPerspectivedemo.cpp, to let it 
-could be able to deal with video.
-warpPerspectivedemo.cpp can do perspective transformation applied on an image.
-When the users select an area, this program will warp the image in this area
-into a rectangle shape.
-What we do in this project is changing the input to video, so the program will
-able to cut out an part of the video and do perspective transformation.
+In this project, we improved the example, warpPerspectivedemo.cpp, to let it could be able to deal with video.
+warpPerspectivedemo.cpp can do perspective transformation applied on an image. When the users select an area, this program will warp the image in this area into a rectangle shape.
+What we do in this project is changing the input to video, so the program will able to cut out an part of the video and do perspective transformation.
