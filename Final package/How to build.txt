@@ -1,0 +1,4 @@
+To use this program, OpenCV library is needed. With OpenCV environment, first 
+just compile the main.cpp file. Then, run the executable with the name of the video. 
+For example, in terminal, using "g++ -o main main.cpp" to compile the 
+main.cpp and then use "./main sample.video" to process the video.
